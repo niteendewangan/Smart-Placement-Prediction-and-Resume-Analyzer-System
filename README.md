@@ -1,1 +1,0 @@
-# Smart-Placement-Prediction-and-Resume-Analyzer-System
