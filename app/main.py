@@ -1,5 +1,11 @@
-# Streamlit app
+import sys
+import os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+
+
+# Streamlit app
 import streamlit as st
 from src.placement_model.predict import predict_placement
 from src.resume_analyzer.parser import extract_text_from_pdf
@@ -7,9 +13,8 @@ from src.resume_analyzer.skill_extractor import extract_skills, get_resume_score
 
 st.title("🎓 Smart Placement Predictor + Resume Analyzer")
 
-# -------------------------
+
 # Placement Prediction
-# -------------------------
 st.header("📊 Placement Prediction")
 
 cgpa = st.slider("CGPA", 0.0, 10.0, 7.0)
@@ -22,9 +27,8 @@ if st.button("Predict Placement"):
     result = predict_placement(features)
     st.success(f"Placement Probability: {result}%")
 
-# -------------------------
+
 # Resume Analyzer
-# -------------------------
 st.header("📄 Resume Analyzer")
 
 uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
