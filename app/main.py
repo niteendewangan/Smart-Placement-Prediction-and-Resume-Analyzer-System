@@ -4,47 +4,75 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-
-# Streamlit app
+#Streamlit App
 import streamlit as st
+import pandas as pd
 from src.placement_model.predict import predict_placement
 from src.resume_analyzer.parser import extract_text_from_pdf
 from src.resume_analyzer.skill_extractor import extract_skills, get_resume_score
+from src.recommender.job_recommender import recommend_jobs
 
-st.title("🎓 Smart Placement Predictor + Resume Analyzer")
+st.set_page_config(page_title="Smart Placement System", layout="wide")
 
+st.title("🎓 Smart Placement Intelligence System")
 
-# Placement Prediction
-st.header("📊 Placement Prediction")
+tab1, tab2, tab3 = st.tabs(["📊 Prediction", "📄 Resume Analyzer", "🎯 Job Recommender"])
 
-cgpa = st.slider("CGPA", 0.0, 10.0, 7.0)
-internships = st.number_input("Internships", 0, 10, 1)
-projects = st.number_input("Projects", 0, 10, 2)
-skills_count = st.number_input("Number of Skills", 0, 20, 5)
+# ---------------- TAB 1 ----------------
+with tab1:
+    st.subheader("Placement Prediction")
 
-if st.button("Predict Placement"):
-    features = [cgpa, internships, projects, skills_count]
-    result = predict_placement(features)
-    st.success(f"Placement Probability: {result}%")
+    col1, col2 = st.columns(2)
 
+    with col1:
+        cgpa = st.slider("CGPA", 0.0, 10.0, 7.0)
+        internships = st.number_input("Internships", 0, 10, 1)
 
-# Resume Analyzer
-st.header("📄 Resume Analyzer")
+    with col2:
+        projects = st.number_input("Projects", 0, 10, 2)
+        skills_count = st.number_input("Skills Count", 0, 20, 5)
 
-uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
+    if st.button("Predict"):
+        features = [cgpa, internships, projects, skills_count]
+        result = predict_placement(features)
 
-if uploaded_file:
-    text = extract_text_from_pdf(uploaded_file)
-    skills = extract_skills(text)
-    score = get_resume_score(skills)
+        st.metric("Placement Probability", f"{result}%")
 
-    st.subheader("✅ Detected Skills")
-    st.write(skills)
+        if result < 50:
+            st.error("⚠️ Improve your profile!")
+        else:
+            st.success("✅ You are placement ready!")
 
-    st.subheader("📈 Resume Score")
-    st.write(f"{score}/100")
+# ---------------- TAB 2 ----------------
+with tab2:
+    st.subheader("Resume Analyzer")
 
-    if score < 50:
-        st.warning("Add more relevant skills and projects!")
-    else:
-        st.success("Good resume!")
+    file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
+
+    if file:
+        text = extract_text_from_pdf(file)
+        skills = extract_skills(text)
+        score = get_resume_score(skills)
+
+        st.write("### Skills Detected")
+        st.write(skills)
+
+        st.progress(score / 100)
+
+        st.write(f"### Resume Score: {score}/100")
+
+# ---------------- TAB 3 ----------------
+with tab3:
+    st.subheader("Job Recommendation")
+
+    user_skills = st.text_input("Enter your skills (comma separated)")
+
+    if st.button("Recommend Jobs"):
+        skills_list = [s.strip().lower() for s in user_skills.split(",")]
+        jobs = recommend_jobs(skills_list)
+
+        for job in jobs:
+            st.write(f"👉 {job}")
+            
+            
+            

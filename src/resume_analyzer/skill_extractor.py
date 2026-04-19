@@ -2,22 +2,29 @@ import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
-SKILLS = [
-    "python", "java", "c++", "sql", "machine learning",
-    "data analysis", "deep learning", "excel", "power bi"
-]
+SKILL_DB = {
+    "data scientist": ["python", "machine learning", "pandas", "numpy"],
+    "web developer": ["html", "css", "javascript"],
+    "data analyst": ["excel", "sql", "power bi"]
+}
 
 def extract_skills(text):
-    doc = nlp(text)
-    found_skills = []
+    text = text.lower()
+    found = []
 
-    for skill in SKILLS:
-        if skill in text:
-            found_skills.append(skill)
+    for role, skills in SKILL_DB.items():
+        for skill in skills:
+            if skill in text:
+                found.append(skill)
 
-    return list(set(found_skills))
+    return list(set(found))
 
 
 def get_resume_score(skills):
-    score = len(skills) * 10
+    score = len(skills) * 12
     return min(score, 100)
+
+
+def missing_skills(user_skills):
+    all_skills = set(sum(SKILL_DB.values(), []))
+    return list(all_skills - set(user_skills))
