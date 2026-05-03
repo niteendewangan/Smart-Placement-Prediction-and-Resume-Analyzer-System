@@ -1,3 +1,5 @@
+import streamlit as st
+
 import sys
 import os
 
@@ -73,6 +75,5 @@ with tab3:
 
         for job in jobs:
             st.write(f"👉 {job}")
-            
             
             
