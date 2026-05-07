@@ -1,0 +1,47 @@
+{
+  "trained_at_utc": "2026-05-07T11:19:04.576541+00:00",
+  "raw_data_path": "data/raw/placement.csv",
+  "processed_data_path": "data/processed/placement.csv",
+  "model_path": "models/placement_model.pkl",
+  "feature_columns": [
+    "cgpa",
+    "placement_exam_marks"
+  ],
+  "target_column": "placed",
+  "dataset_summary": {
+    "sample_size": 981,
+    "placement_rate": 49.03,
+    "average_cgpa": 6.96,
+    "average_exam_marks": 32.29
+  },
+  "train_rows": 784,
+  "test_rows": 197,
+  "best_model": "Logistic Regression",
+  "selection_metric": "roc_auc",
+  "test_metrics": {
+    "model": "Logistic Regression",
+    "accuracy": 0.4518,
+    "precision": 0.4444,
+    "recall": 0.4536,
+    "f1": 0.449,
+    "roc_auc": 0.4905
+  },
+  "leaderboard": [
+    {
+      "model": "Logistic Regression",
+      "accuracy": 0.4518,
+      "precision": 0.4444,
+      "recall": 0.4536,
+      "f1": 0.449,
+      "roc_auc": 0.4905
+    },
+    {
+      "model": "Random Forest",
+      "accuracy": 0.4518,
+      "precision": 0.4337,
+      "recall": 0.3711,
+      "f1": 0.4,
+      "roc_auc": 0.4387
+    }
+  ]
+}
