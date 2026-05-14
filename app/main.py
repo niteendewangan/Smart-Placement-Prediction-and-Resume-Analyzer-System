@@ -105,13 +105,6 @@ def render_pills(items: list[str]) -> None:
     st.markdown(f"<div class='pill-wrap'>{markup}</div>", unsafe_allow_html=True)
 
 
-def readiness_message(score: float) -> tuple[str, str]:
-    if score >= 75:
-        return "High readiness", "Your profile is performing strongly against the training data benchmark."
-    if score >= 50:
-        return "Moderate readiness", "You are in a workable range, but stronger screening signals would improve confidence."
-    return "Needs improvement", "The model sees this profile as high risk. Focus on academics and aptitude performance first."
-
 
 def parse_training_time(raw_value: str | None) -> str:
     if not raw_value:
@@ -167,29 +160,11 @@ st.markdown(
     f"""
     <div class="hero">
         <h1>Placement Intelligence Dashboard</h1>
-        <p>
-            Cleaned data from <strong>data/raw/placement.csv</strong>, trained a fresh placement model,
-            and surfaced both the dataset and model performance directly inside Streamlit.
-        </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-with st.sidebar:
-    st.header("Pipeline Status")
-    st.caption("Source: `data/raw/placement.csv`")
-    st.caption(f"Processed file: `{PROCESSED_DATA_PATH.relative_to(PROJECT_ROOT)}`")
-    st.caption(f"Rows after cleaning: {dataset_summary['sample_size']}")
-    st.caption(f"Placement rate: {dataset_summary['placement_rate']:.2f}%")
-    st.caption(f"Last training run: {parse_training_time(training_metadata.get('trained_at_utc'))}")
-
-    st.divider()
-    st.subheader("Model")
-    st.caption(f"Selected model: {training_metadata.get('best_model', 'Unavailable')}")
-    if test_metrics:
-        st.caption(f"Accuracy: {test_metrics.get('accuracy', 0) * 100:.2f}%")
-        st.caption(f"ROC AUC: {test_metrics.get('roc_auc', 0):.4f}")
 
 overview_tab, predict_tab, resume_tab, jobs_tab = st.tabs(
     [
@@ -224,11 +199,11 @@ with overview_tab:
         f"{test_metrics.get('roc_auc', 0):.4f}" if test_metrics else "Unavailable",
     )
 
-    if test_metrics and test_metrics.get("roc_auc", 0) < 0.55:
-        st.warning(
-            "The pipeline is working, but this dataset has weak predictive signal with the current two input columns. "
-            "Use the model as a demo/benchmark, not as a high-confidence production predictor."
-        )
+    # if test_metrics and test_metrics.get("roc_auc", 0) < 0.55:
+    #     st.warning(
+    #         "The pipeline is working, but this dataset has weak predictive signal with the current two input columns. "
+    #         "Use the model as a demo/benchmark, not as a high-confidence production predictor."
+    #     )
 
     chart_col, notes_col = st.columns([1.2, 0.8], gap="large")
 
@@ -239,23 +214,6 @@ with overview_tab:
         else:
             st.bar_chart(cohort_profile)
 
-    with notes_col:
-        st.markdown("#### Training Notes")
-        st.markdown(
-            """
-            <div class="note-card">
-                The preprocessing step standardizes columns, converts the values to numeric,
-                drops duplicates and missing rows, and keeps only valid CGPA, exam-score, and target ranges.
-            </div>
-            <div class="note-card">
-                The training pipeline compares Logistic Regression and Random Forest, then saves the stronger model using ROC AUC as the selection metric.
-            </div>
-            <div class="note-card">
-                The same saved artifact is used for the live prediction tab, so the dashboard and backend stay consistent.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
     st.markdown("#### Model Leaderboard")
     if leaderboard.empty:
@@ -266,9 +224,35 @@ with overview_tab:
     st.markdown("#### Processed Dataset Preview")
     st.dataframe(processed_df.head(20), hide_index=True, use_container_width=True)
 
+
+def readiness_message(probability):
+    if probability >= 0.8:
+        return (
+            "Excellent",
+            "You are highly placement ready. Keep improving projects and interview preparation."
+        )
+
+    elif probability >= 0.6:
+        return (
+            "Good",
+            "You have a good chance of placement. Focus on aptitude, communication, and projects."
+        )
+
+    elif probability >= 0.4:
+        return (
+            "Average",
+            "You need improvement in technical skills, resume quality, and mock interviews."
+        )
+
+    else:
+        return (
+            "Low",
+            "Your placement readiness is currently low. Work on skills, resume building, and practice regularly."
+        )
+
+
 with predict_tab:
     st.subheader("Live Placement Prediction")
-    st.caption("This form uses the same two features that were trained from the cleaned raw CSV.")
 
     with st.form("placement_prediction_form"):
         form_col1, form_col2 = st.columns(2)
